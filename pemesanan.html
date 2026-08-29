@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Booking Sesi Foto — Poto.</title>
+  <meta name="description" content="Booking sesi foto wisuda sama Khaidir di Palu. Pilih paket, atur jadwal, langsung konfirmasi via WhatsApp." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=DM+Serif+Display:ital@0;1&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    /* ═══════════════════════════════════════════
+       PEMESANAN PAGE STYLES
+    ═══════════════════════════════════════════ */
+    .page-header {
+      background: var(--ink);
+      padding: 120px 0 64px;
+      text-align: center;
+    }
+    .page-header .section-label {
+      background: rgba(255,255,255,.08);
+      color: #F5C49A;
+      border: 1px solid rgba(245,196,154,.15);
+    }
+    .page-header h1 {
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      color: #fff;
+      margin-bottom: 8px;
+      text-wrap: balance;
+    }
+    .page-header p {
+      color: rgba(255,255,255,.5);
+      font-size: .95rem;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* Paket selection area */
+    .pemesanan-paket {
+      background: var(--ink);
+      padding: 0 0 80px;
+    }
+    .pemesanan-paket .harga-tabs {
+      margin-bottom: 28px;
+    }
+
+    /* Selectable paket cards */
+    .paket-card.selectable {
+      cursor: pointer;
+      position: relative;
+    }
+    .paket-card.selectable.selected {
+      border-color: var(--accent) !important;
+      background: rgba(255,107,43,.08) !important;
+    }
+    .paket-card.selectable.selected::before {
+      opacity: 1;
+    }
+    .paket-card.recommended.selected {
+      background: var(--white) !important;
+      box-shadow: 0 8px 48px rgba(255,107,43,.3);
+    }
+
+    .paket-check {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .25s;
+      font-size: .8rem;
+      color: transparent;
+    }
+    .paket-card.recommended .paket-check {
+      border-color: var(--border);
+    }
+    .paket-card.selected .paket-check {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Form section */
+    .pemesanan-form-section {
+      background: var(--surface);
+      padding: 80px 0 96px;
+    }
+
+    .pemesanan-form-wrap {
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .pemesanan-form-wrap h2 {
+      font-size: clamp(1.6rem, 4vw, 2rem);
+      margin-bottom: 8px;
+      text-wrap: balance;
+    }
+
+    .pemesanan-form-wrap .sub-desc {
+      color: var(--ink-muted);
+      font-size: .92rem;
+      margin-bottom: 32px;
+    }
+
+    .selected-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      background: var(--accent-soft);
+      border-radius: 100px;
+      font-size: .9rem;
+      font-weight: 600;
+      color: var(--accent-dark);
+      margin-bottom: 28px;
+    }
+    .selected-badge:empty { display: none; }
+
+    .booking-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .booking-footer-note {
+      text-align: center;
+      font-size: .75rem;
+      color: var(--ink-muted);
+      margin-top: -4px;
+    }
+
+    .form-disabled {
+      opacity: .5;
+      pointer-events: none;
+    }
+
+    .select-prompt {
+      text-align: center;
+      padding: 32px 20px;
+      color: var(--ink-faint);
+      font-size: .95rem;
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+    }
+    .select-prompt strong {
+      display: block;
+      color: var(--ink-muted);
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,.5);
+      text-decoration: none;
+      font-size: .88rem;
+      font-weight: 500;
+      margin-bottom: 24px;
+      transition: color .2s;
+    }
+    .back-link:hover { color: rgba(255,255,255,.8); }
+
+    /* Anchor offset for scroll */
+    #form-section {
+      scroll-margin-top: 80px;
+    }
+
+    @media (max-width: 768px) {
+      .page-header { padding: 100px 0 48px; }
+      .pemesanan-paket { padding: 0 0 56px; }
+      .pemesanan-form-section { padding: 56px 0 72px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- STICKY NAV -->
+  <nav class="site-nav" id="siteNav">
+    <div class="nav-inner">
+      <a href="index.html#hero" class="nav-brand">Poto<span class="dot">.</span></a>
+      <ul class="nav-links">
+        <li><a href="index.html#kenapa">Kenapa Poto</a></li>
+        <li><a href="index.html#harga">Paket</a></li>
+        <li><a href="index.html#portofolio">Portofolio</a></li>
+        <li><a href="index.html#faq">FAQ</a></li>
+        <li><a href="https://wa.me/6285244189949?text=Halo%20Khaidir%2C%20aku%20mau%20tanya%20soal%20foto%20wisuda%20nih!" class="nav-cta" target="_blank" rel="noopener">Chat WA</a></li>
+      </ul>
+    </div>
+  </nav>
+
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div class="container">
+      <a href="index.html" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Kembali ke beranda
+      </a>
+      <span class="section-label reveal">Booking</span>
+      <h1 class="reveal">Pilih paket,<br />atur jadwal kamu.</h1>
+      <p class="reveal">Pilih paket yang cocok, isi data singkat, dan langsung konfirmasi lewat WhatsApp.</p>
+    </div>
+  </div>
+
+
+  <!-- PAKET SELECTION -->
+  <div class="pemesanan-paket">
+    <div class="container">
+      <div class="harga-tabs reveal" id="paketTabs">
+        <button type="button" class="harga-tab active" data-target="grid-perorangan">Perorangan</button>
+        <button type="button" class="harga-tab" data-target="grid-grup">Grup / Squad</button>
+      </div>
+
+      <div class="paket-grid" id="grid-perorangan">
+        <div class="paket-card selectable reveal reveal-d1" data-paket="essential" data-nama="Paket Essential" data-harga="Rp 200.000" data-tipe="solo" onclick="selectPaket(this)">
+          <span class="paket-check">&#10003;</span>
+          <div class="paket-icon">📸</div>
+          <div class="paket-name">Paket Essential</div>
+          <div class="paket-price">Rp 200.000</div>
+          <div class="paket-note">Simpel, nggak ribet, langsung jadi.</div>
+          <hr class="paket-divider" />
+          <ul class="paket-list">
+            <li>Sesi foto 30 menit</li>
+            <li>Bebas pilih tempat</li>
+            <li>25 file hasil editan</li>
+            <li>File digital resolusi penuh</li>
+            <li>Kirim via Google Drive / WA</li>
+          </ul>
+        </div>
+
+        <div class="paket-card recommended selectable reveal reveal-d2" data-paket="cinematic" data-nama="Paket Cinematic" data-harga="Rp 400.000" data-tipe="solo" onclick="selectPaket(this)">
+          <span class="paket-check">&#10003;</span>
+          <span class="badge-recom">Paling Sering Ditanya</span>
+          <div class="paket-icon">🎬</div>
+          <div class="paket-name">Paket Cinematic</div>
+          <div class="paket-price">Rp 400.000</div>
+          <div class="paket-note">Foto + video cinematic buat kenang-kenangan.</div>
+          <hr class="paket-divider" />
+          <ul class="paket-list">
+            <li>Sesi foto 1 jam</li>
+            <li>Bebas pilih tempat</li>
+            <li>25 file hasil editan</li>
+            <li>Video cinematic maks 1 menit</li>
+            <li>File digital resolusi penuh</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="paket-grid" id="grid-grup" style="display:none;">
+        <div class="paket-card selectable reveal reveal-d1" data-paket="squad-santai" data-nama="Squad Santai" data-harga="Rp 350.000" data-tipe="grup" onclick="selectPaket(this)">
+          <span class="paket-check">&#10003;</span>
+          <div class="paket-icon">🎉</div>
+          <div class="paket-name">Squad Santai</div>
+          <div class="paket-price">Rp 350.000</div>
+          <div class="paket-note">Maks 4 orang, tambah orang +60rb.</div>
+          <hr class="paket-divider" />
+          <ul class="paket-list">
+            <li>Sesi foto 40 menit</li>
+            <li>Bebas pilih tempat</li>
+            <li>Maksimal 4 orang</li>
+            <li>25 file hasil editan</li>
+            <li>+Rp 60.000 per orang tambahan</li>
+          </ul>
+        </div>
+
+        <div class="paket-card selectable reveal reveal-d2" data-paket="squad-sinema" data-nama="Squad Sinema" data-harga="Rp 650.000" data-tipe="grup" onclick="selectPaket(this)">
+          <span class="paket-check">&#10003;</span>
+          <div class="paket-icon">🎥</div>
+          <div class="paket-name">Squad Sinema</div>
+          <div class="paket-price">Rp 650.000</div>
+          <div class="paket-note">Paling lengkap — foto + video cinematic.</div>
+          <hr class="paket-divider" />
+          <ul class="paket-list">
+            <li>Sesi foto &amp; video 1 jam</li>
+            <li>Video cinematic maks 1 menit</li>
+            <li>Teknik strobist (siang/malam)</li>
+            <li>Maksimal 4 orang</li>
+            <li>25 file hasil editan</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- BOOKING FORM -->
+  <section class="pemesanan-form-section" id="form-section">
+    <div class="container">
+      <div class="pemesanan-form-wrap">
+        <h2 class="reveal">Isi data booking kamu</h2>
+        <p class="sub-desc reveal">Data kamu dikirim langsung ke WhatsApp Khaidir, nggak disimpan di mana-mana.</p>
+
+        <div class="selected-badge reveal" id="selectedBadge"></div>
+
+        <div id="formArea">
+          <div class="select-prompt reveal" id="selectPrompt">
+            <strong>Belum pilih paket</strong>
+            Pilih salah satu paket di atas dulu, baru isi form di sini.
+          </div>
+
+          <form class="booking-form" id="bookingForm" onsubmit="submitBooking(event)" style="display:none;">
+            <div class="form-group">
+              <label for="bNama">Nama lengkap</label>
+              <input type="text" id="bNama" placeholder="Contoh: Siti Aisyah" required />
+            </div>
+            <div class="form-group">
+              <label for="bHP">Nomor WhatsApp</label>
+              <input type="tel" id="bHP" placeholder="08xxxxxxxxxx" required />
+            </div>
+            <div class="form-group">
+              <label for="bAlamat">Alamat / kampus</label>
+              <input type="text" id="bAlamat" placeholder="Contoh: Universitas Tadulako" required />
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="bTanggal">Tanggal foto</label>
+                <input type="date" id="bTanggal" required />
+              </div>
+              <div class="form-group">
+                <label for="bWaktu">Jam mulai</label>
+                <select id="bWaktu" required>
+                  <option value="">Pilih jam</option>
+                  <option value="07:00">07:00 Pagi</option>
+                  <option value="08:00">08:00 Pagi</option>
+                  <option value="09:00">09:00 Pagi</option>
+                  <option value="10:00">10:00 Pagi</option>
+                  <option value="11:00">11:00 Siang</option>
+                  <option value="13:00">13:00 Siang</option>
+                  <option value="14:00">14:00 Siang</option>
+                  <option value="15:00">15:00 Sore</option>
+                  <option value="16:00">16:00 Sore</option>
+                  <option value="17:00">17:00 Sore</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-group" id="grupJumlahWrap" style="display:none">
+              <label for="bJumlah">Jumlah orang</label>
+              <select id="bJumlah">
+                <option value="2">2 orang</option>
+                <option value="3">3 orang</option>
+                <option value="4" selected>4 orang</option>
+                <option value="5">5 orang (+Rp 60rb)</option>
+                <option value="6">6 orang (+Rp 120rb)</option>
+                <option value="7">7 orang (+Rp 180rb)</option>
+                <option value="8">8 orang (+Rp 240rb)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="bCatatan">Catatan tambahan (opsional)</label>
+              <textarea id="bCatatan" rows="2" placeholder="Mau foto di spot tertentu? Ada request khusus?"></textarea>
+            </div>
+            <button type="submit" class="booking-submit">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Kirim Booking via WhatsApp
+            </button>
+            <p class="booking-footer-note">Data kamu dikirim langsung ke WhatsApp Khaidir, nggak disimpan di mana-mana.</p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- FLOATING WA -->
+  <a href="https://wa.me/6285244189949?text=Halo%20Khaidir%2C%20aku%20mau%20tanya%20soal%20foto%20wisuda%20nih!" class="wa-float" target="_blank" rel="noopener" aria-label="Chat WhatsApp">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    <span>Tanya via WhatsApp</span>
+  </a>
+
+
+  <footer>
+    <p>&copy; 2026 Poto. &middot; Foto Wisuda sama Khaidir, Palu</p>
+  </footer>
+
+
+  <script src="script.js"></script>
+  <script>
+    // Paket selection state
+    var selectedPaket = '';
+    var selectedHarga = '';
+    var selectedTipe = '';
+
+    // Tab switcher
+    document.querySelectorAll('.harga-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        document.querySelectorAll('.harga-tab').forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        document.getElementById('grid-perorangan').style.display = tab.dataset.target === 'grid-perorangan' ? 'grid' : 'none';
+        document.getElementById('grid-grup').style.display = tab.dataset.target === 'grid-grup' ? 'grid' : 'none';
+      });
+    });
+
+    function selectPaket(card) {
+      document.querySelectorAll('.paket-card.selectable').forEach(function(c) {
+        c.classList.remove('selected');
+      });
+      card.classList.add('selected');
+
+      selectedPaket = card.dataset.nama;
+      selectedHarga = card.dataset.harga;
+      selectedTipe = card.dataset.tipe;
+
+      document.getElementById('selectedBadge').textContent = selectedPaket + ' — ' + selectedHarga;
+      document.getElementById('selectPrompt').style.display = 'none';
+      document.getElementById('bookingForm').style.display = 'flex';
+      document.getElementById('grupJumlahWrap').style.display = selectedTipe === 'grup' ? 'block' : 'none';
+
+      var today = new Date();
+      today.setDate(today.getDate() + 3);
+      document.getElementById('bTanggal').min = today.toISOString().split('T')[0];
+
+      document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function submitBooking(e) {
+      e.preventDefault();
+      var nama = document.getElementById('bNama').value.trim();
+      var hp = document.getElementById('bHP').value.trim();
+      var alamat = document.getElementById('bAlamat').value.trim();
+      var tanggal = document.getElementById('bTanggal').value;
+      var waktu = document.getElementById('bWaktu').value;
+      var catatan = document.getElementById('bCatatan').value.trim();
+      var isGrup = selectedTipe === 'grup';
+      var jumlah = isGrup ? document.getElementById('bJumlah').value + ' orang' : '';
+
+      var tglFormatted = new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      var msg = 'Halo Khaidir! Saya mau booking foto wisuda.\n\n';
+      msg += '\u{1F4CB} *Detail Booking*\n';
+      msg += '• Paket: ' + selectedPaket + ' (' + selectedHarga + ')\n';
+      msg += '• Nama: ' + nama + '\n';
+      msg += '• WA: ' + hp + '\n';
+      msg += '• Lokasi: ' + alamat + '\n';
+      msg += '• Tanggal: ' + tglFormatted + '\n';
+      msg += '• Jam: ' + waktu + '\n';
+      if (isGrup) msg += '• Jumlah: ' + jumlah + '\n';
+      if (catatan) msg += '• Catatan: ' + catatan + '\n';
+      msg += '\nDitunggu konfirmasinya ya! \u{1F64F}';
+
+      var waUrl = 'https://wa.me/6285244189949?text=' + encodeURIComponent(msg);
+      window.open(waUrl, '_blank');
+    }
+
+    // Handle query param pre-selection
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var paketParam = params.get('paket');
+      if (!paketParam) return;
+
+      var paketId = paketParam.toLowerCase();
+      var card = document.querySelector('[data-paket="' + paketId + '"]');
+      if (!card) return;
+
+      var isGrup = card.dataset.tipe === 'grup';
+      if (isGrup) {
+        document.querySelectorAll('.harga-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelector('[data-target="grid-grup"]').classList.add('active');
+        document.getElementById('grid-perorangan').style.display = 'none';
+        document.getElementById('grid-grup').style.display = 'grid';
+      }
+
+      selectPaket(card);
+    })();
+  </script>
+
+</body>
+</html>
